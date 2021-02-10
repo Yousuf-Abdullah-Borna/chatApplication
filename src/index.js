@@ -16,10 +16,33 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 //helps to serve the static files
 app.use(express.static(publicDirectoryPath))
 
+let count = 0;
 
-io.on('connection',()=>{
 
+
+io.on('connection',(socket)=>{
+
+   console.log("connected to the server")
+
+    socket.emit('welcome')
+    /*
     console.log("connection is alive")
+
+    socket.emit('countUpdated',count)
+
+    socket.on("increment",()=>{
+
+        count++
+
+        io.emit('countUpdated',count)
+    })
+    */
+
+    socket.on('sendMessage', (messages)=>{
+        
+        io.emit('allMessage',messages)
+         
+    })
 
 })
 
