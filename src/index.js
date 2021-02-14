@@ -66,7 +66,7 @@ io.on('connection',(socket)=>{
     socket.on('sendLocation',(data,callback)=>{
 
    
-        socket.broadcast.emit('allMessage',data)
+        socket.broadcast.emit('locationMessage',data)
         callback()
 
     })
