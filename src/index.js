@@ -4,6 +4,8 @@ const path = require('path')
 const app = express();
 const socketio = require('socket.io')
 const filter = require('bad-words')
+const {generateMessage} = require('./utils/messages')
+const {generateLocationMessage} = require('./utils/messages')
 
 const server= http.createServer(app)
 
@@ -25,9 +27,10 @@ io.on('connection',(socket)=>{
 
    console.log("connected to the server")
 
-    socket.emit('welcome')
 
-    socket.broadcast.emit('messages', 'A new user has joined')
+    socket.emit('welcome',generateMessage('Welcome!'))
+
+    socket.broadcast.emit('messages', generateMessage('A new user has joined'))
     /*
     console.log("connection is alive")
 
@@ -50,7 +53,7 @@ io.on('connection',(socket)=>{
                  return callback('Profanity is not allowed!')
          }
 
-        io.emit('messages',messages)
+        io.emit('messages',generateMessage(messages))
         callback()
         
          
@@ -59,7 +62,7 @@ io.on('connection',(socket)=>{
 
     socket.on('disconnect', ()=>{
   
-        io.emit('messages', 'left the connection')
+        io.emit('messages', generateMessage('left the connection'))
 
     })
 

@@ -9,16 +9,17 @@ const $sendLocationButton=document.querySelector('#send-location')
 const $messages = document.querySelector('#messages')
 
 //Template
-
 let messageTemplate = document.querySelector('#message-template').innerHTML
+let locationMessageTemplate = document.querySelector("#location-message-template").innerHTML
 
 socket.on('messages', (data)=>{
 
-    console.log(data)
+    console.log(data.text)
     
     const html = Mustache.render(messageTemplate,{
 
-         message:data
+         message:data.text,
+         time: moment(data.createdAt).format('h:mm A')
     })
     $messages.insertAdjacentHTML('beforeend', html)
 
@@ -29,8 +30,16 @@ socket.on('messages', (data)=>{
 
 socket.on('locationMessage', (url) =>{
 
-
     console.log(url)
+   let newUrl = "https://www.google.com/maps?q="+url.lat+","+url.long
+
+    const html = Mustache.render(locationMessageTemplate,{
+
+        url:newUrl
+   })
+   $messages.insertAdjacentHTML('beforeend', html)
+
+   
 })
 
 
