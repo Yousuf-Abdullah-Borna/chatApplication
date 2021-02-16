@@ -6,6 +6,7 @@ const socketio = require('socket.io')
 const filter = require('bad-words')
 const {generateMessage} = require('./utils/messages')
 const {generateLocationMessage} = require('./utils/messages')
+const { addUser,removeUser,getUser,getUsersInRoom} = require('./utils/users')
 
 const server= http.createServer(app)
 
@@ -28,9 +29,9 @@ io.on('connection',(socket)=>{
    console.log("connected to the server")
 
 
-    socket.emit('welcome',generateMessage('Welcome!'))
+    //socket.emit('welcome',generateMessage('Welcome!'))
 
-    socket.broadcast.emit('messages', generateMessage('A new user has joined'))
+    //socket.broadcast.emit('messages', generateMessage('A new user has joined'))
     /*
     console.log("connection is alive")
 
@@ -43,6 +44,23 @@ io.on('connection',(socket)=>{
         io.emit('countUpdated',count)
     })
     */
+
+    socket.on('join', (options,callback)=>{
+
+        const {error, user} =addUser({id:socket.id, ...options})
+
+        if( error){
+
+            return  callback(error)
+        }
+
+        socket.join(user.room)
+        socket.emit('welcome',generateMessage('Welcome!'))
+
+        socket.broadcast.to(user.room).emit('messages', generateMessage(user.username+' has joined !'))
+        callback()
+
+    })
 
     socket.on('sendMessage', (messages,callback)=>{
         
@@ -61,8 +79,16 @@ io.on('connection',(socket)=>{
 
 
     socket.on('disconnect', ()=>{
+
+       const user= removeUser(socket.id)
+
+       if(user){
+
+        io.to(user.room).emit('messages', generateMessage(user.username+' has left the connection'))
+
+       }
   
-        io.emit('messages', generateMessage('left the connection'))
+        
 
     })
 
