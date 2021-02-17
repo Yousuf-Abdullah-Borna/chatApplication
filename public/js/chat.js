@@ -8,14 +8,33 @@ const $messageFormButton =$messageForm.querySelector('button')
 const $sendLocationButton=document.querySelector('#send-location')
 const $messages = document.querySelector('#messages')
 
+
 //Template
 let messageTemplate = document.querySelector('#message-template').innerHTML
 let locationMessageTemplate = document.querySelector("#location-message-template").innerHTML
-
+let sidebarTemplate = document.querySelector('#sidebar-template').innerHTML
 //Option
 
 const { username,room} = Qs.parse(location.search,{ignoreQueryPrefix:true}) 
+const autoscroll = () =>{
 
+    const $newMessage = $messages.lastElementChild
+
+    const newMessageStyles = getComputedStyle($newMessage)
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom)
+    const newMessageHeight = $newMessage.offsetHeight +newMessageMargin
+
+    const visibleHeight = $messages.offsetHeight
+    const containerHeight = $messages.scrollHeight
+
+    const scrollOffset = $messages.scrollTop +visibleHeight
+
+    if(containerHeight - newMessageHeight <= scrollOffset){
+
+         $messages.scrollTop = $messages.scrollHeight
+    }
+
+}
 
 
 
@@ -24,11 +43,12 @@ socket.on('messages', (data)=>{
     console.log(data.text)
     
     const html = Mustache.render(messageTemplate,{
-
+        username:data.username,
          message:data.text,
          time: moment(data.createdAt).format('h:mm A')
     })
     $messages.insertAdjacentHTML('beforeend', html)
+    autoscroll()
 
 })
 
@@ -45,8 +65,22 @@ socket.on('locationMessage', (url) =>{
         url:newUrl
    })
    $messages.insertAdjacentHTML('beforeend', html)
-
+   autoscroll()
    
+})
+
+socket.on('roomData', ({room,users})=>{
+
+    console.log(room)
+    console.log(users)
+
+    const html = Mustache.render(sidebarTemplate,{
+
+        room,
+        users
+   })
+   document.querySelector('#sidebar').innerHTML = html
+
 })
 
 
